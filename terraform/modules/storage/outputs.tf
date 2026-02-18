@@ -1,6 +1,16 @@
-output "storage_account_name"        { value = azurerm_storage_account.this.name }
-output "storage_account_primary_key" { value = azurerm_storage_account.this.primary_access_key
-  sensitive = true }
-output "uploads_container_name"      { value = azurerm_storage_container.uploads.name }
-output "processed_container_name"    { value = azurerm_storage_container.processed.name }
-output "archive_container_name"      { value = azurerm_storage_container.archive.name }
+output "storage_account_name" {
+  value = azurerm_storage_account.this.name
+}
+output "storage_account_primary_key" {
+  value     = azurerm_storage_account.this.primary_access_key
+  sensitive = true
+}
+output "uploads_container_name" {
+  value = azurerm_storage_container.uploads.name
+}
+output "processed_container_name" {
+  value = azurerm_storage_container.processed.name
+}
+output "archive_container_name" {
+  value = azurerm_storage_container.archive.name
+}

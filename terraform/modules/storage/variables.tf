@@ -1,11 +1,27 @@
-variable "project_name"              { type = string }
-variable "environment"               { type = string }
-variable "location"                  { type = string }
-variable "resource_group_name"       { type = string }
-variable "replication_type"          { type = string
-  default = "LRS" }
-variable "blob_retention_days"       { type = number
-  default = 30 }
-variable "key_vault_id"              { type = string }
-variable "tags"                      { type = map(string)
-  default = {} }
+variable "project_name" {
+  type = string
+}
+variable "environment" {
+  type = string
+}
+variable "location" {
+  type = string
+}
+variable "resource_group_name" {
+  type = string
+}
+variable "replication_type" {
+  type    = string
+  default = "LRS"
+}
+variable "blob_retention_days" {
+  type    = number
+  default = 30
+}
+variable "key_vault_id" {
+  type = string
+}
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
