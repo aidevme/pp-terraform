@@ -58,6 +58,7 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_USE_OIDC: "true"
+          ARM_USE_CLI: "false"
         run: |
           terraform init \
             -backend-config="environments/backend-${{ github.event.inputs.environment || 'dev' }}.hcl"
@@ -78,6 +79,7 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_USE_OIDC: "true"
+          ARM_USE_CLI: "false"
           TF_VAR_connector_api_key: ${{ secrets.CONNECTOR_API_KEY }}
         run: |
           terraform plan \
@@ -152,6 +154,7 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_USE_OIDC: "true"
+          ARM_USE_CLI: "false"
         run: |
           terraform init \
             -backend-config="environments/backend-${{ github.event.inputs.environment || 'dev' }}.hcl"
@@ -163,6 +166,7 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_USE_OIDC: "true"
+          ARM_USE_CLI: "false"
         run: terraform apply -auto-approve tfplan
 
       - name: Export Terraform Outputs
