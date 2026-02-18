@@ -1,0 +1,169 @@
+name: Terraform — Deploy Azure Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths: ['terraform/**']
+  pull_request:
+    branches: [main]
+    paths: ['terraform/**']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: dev
+        type: choice
+        options: [dev, test, prod]
+
+permissions:
+  id-token: write       # Required for OIDC
+  contents: read
+  pull-requests: write  # Post plan to PR
+
+env:
+  TF_VERSION: '1.7.5'
+  WORKING_DIR: './terraform'
+
+jobs:
+  # ── Plan ─────────────────────────────────────────────────────────────────────
+  terraform-plan:
+    name: Plan — ${{ github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    outputs:
+      plan_exitcode: ${{ steps.plan.outputs.exitcode }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          terraform init \
+            -backend-config="environments/backend-${{ github.event.inputs.environment || 'dev' }}.hcl"
+
+      - name: Terraform Format Check
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_USE_OIDC: "true"
+          TF_VAR_connector_api_key: ${{ secrets.CONNECTOR_API_KEY }}
+        run: |
+          terraform plan \
+            -var-file="environments/${{ github.event.inputs.environment || 'dev' }}.tfvars" \
+            -out=tfplan \
+            -detailed-exitcode \
+            -no-color 2>&1 | tee plan_output.txt
+          echo "exitcode=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Post Plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('terraform/plan_output.txt', 'utf8');
+            const truncated = plan.length > 60000
+              ? plan.substring(0, 60000) + '\n...(truncated)'
+              : plan;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🏗️ Terraform Plan — \`${{ github.event.inputs.environment || 'dev' }}\`\n\`\`\`hcl\n${truncated}\n\`\`\``
+            });
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ github.event.inputs.environment || 'dev' }}
+          path: ${{ env.WORKING_DIR }}/tfplan
+          retention-days: 5
+
+  # ── Apply ─────────────────────────────────────────────────────────────────────
+  terraform-apply:
+    name: Apply — ${{ github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    needs: terraform-plan
+    if: |
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      needs.terraform-plan.outputs.plan_exitcode == '2'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ github.event.inputs.environment || 'dev' }}
+          path: ${{ env.WORKING_DIR }}
+
+      - name: Terraform Init
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          terraform init \
+            -backend-config="environments/backend-${{ github.event.inputs.environment || 'dev' }}.hcl"
+
+      - name: Terraform Apply
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_USE_OIDC: "true"
+        run: terraform apply -auto-approve tfplan
+
+      - name: Export Terraform Outputs
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          FUNC_HOSTNAME=$(terraform output -raw function_app_hostname 2>/dev/null || echo "")
+          KV_URI=$(terraform output -raw key_vault_uri)
+          echo "FUNCTION_APP_HOSTNAME=$FUNC_HOSTNAME" >> $GITHUB_ENV
+          echo "KEY_VAULT_URI=$KV_URI" >> $GITHUB_ENV
+          echo "### ✅ Terraform Apply Complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Output | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Key Vault URI | $KV_URI |" >> $GITHUB_STEP_SUMMARY
+          echo "| Function App | $FUNC_HOSTNAME |" >> $GITHUB_STEP_SUMMARY
