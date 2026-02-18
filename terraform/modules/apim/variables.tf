@@ -4,6 +4,8 @@ variable "location"                   { type = string }
 variable "resource_group_name"        { type = string }
 variable "publisher_name"             { type = string }
 variable "publisher_email"            { type = string }
-variable "function_app_hostname"      { type = string; default = "" }
+variable "function_app_hostname"      { type = string
+  default = "" }
 variable "key_vault_id"               { type = string }
-variable "tags"                       { type = map(string); default = {} }
+variable "tags"                       { type = map(string)
+  default = {} }
