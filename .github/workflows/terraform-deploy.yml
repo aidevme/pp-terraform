@@ -171,6 +171,12 @@ jobs:
 
       - name: Export Terraform Outputs
         working-directory: ${{ env.WORKING_DIR }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_USE_OIDC: "true"
+          ARM_USE_CLI: "false"
         run: |
           FUNC_HOSTNAME=$(terraform output -raw function_app_hostname 2>/dev/null || echo "")
           KV_URI=$(terraform output -raw key_vault_uri)
