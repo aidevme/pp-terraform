@@ -35,22 +35,49 @@ terraform apply -var-file=environments/dev.tfvars
 
 ```
 .
-├── .github/workflows/          # GitHub Actions CI/CD
-├── .azuredevops/               # Azure DevOps pipeline YAML
-├── scripts/                    # Bootstrap & utility scripts
+├── .github/
+│   ├── ISSUE_TEMPLATE/         # Issue templates (bug, feature, docs, infra)
+│   │   ├── bug_report.yml
+│   │   ├── config.yml
+│   │   ├── documentation.yml
+│   │   ├── feature_request.yml
+│   │   └── infrastructure_issue.yml
+│   └── workflows/
+│       └── terraform-deploy.yml # GitHub Actions CI/CD workflow
+├── .azuredevops/
+│   └── terraform-pipeline.yml  # Azure DevOps pipeline YAML
+├── assets/
+│   └── pp-terraform-social-preview.png
+├── docs/
+│   ├── architecture.md          # Architecture diagrams & decisions
+│   ├── article.md               # Related article content
+│   ├── pre-checklist.md         # Pre-deployment setup guide
+│   ├── post-checklist.md        # Post-deployment validation
+│   └── runbook.md               # Operations runbook
+├── scripts/
+│   ├── bootstrap.sh             # Initialize Terraform state storage
+│   └── destroy-nonprod.sh       # Cleanup script for non-prod
 ├── terraform/
-│   ├── main.tf                 # Root module — wires everything together
-│   ├── providers.tf            # Provider & backend configuration
-│   ├── variables.tf            # Input variable declarations
-│   ├── outputs.tf              # Outputs exposed to pipelines
-│   ├── environments/           # Per-environment tfvars & backend configs
-│   └── modules/                # Reusable child modules
-│       ├── keyvault/
-│       ├── storage/
-│       ├── function-app/
-│       ├── apim/
-│       └── app-registration/
-└── docs/                       # Architecture diagrams & runbooks
+│   ├── main.tf                  # Root module — wires everything together
+│   ├── providers.tf             # Provider & backend configuration
+│   ├── variables.tf             # Input variable declarations
+│   ├── outputs.tf               # Outputs exposed to pipelines
+│   ├── environments/            # Per-environment configs
+│   │   ├── backend-dev.hcl
+│   │   ├── backend-test.hcl
+│   │   ├── backend-prod.hcl
+│   │   ├── dev.tfvars
+│   │   ├── test.tfvars
+│   │   └── prod.tfvars
+│   └── modules/                 # Reusable child modules
+│       ├── apim/                # API Management
+│       ├── app-registration/    # Entra ID App Registration
+│       ├── function-app/        # Azure Functions
+│       ├── keyvault/            # Key Vault
+│       └── storage/             # Storage Account
+├── .gitignore
+├── LICENSE
+└── README.md
 ```
 
 ## Environments
