@@ -137,15 +137,172 @@ Navigate to: **Settings → Secrets and variables → Actions → New repository
 | `AZURE_SUBSCRIPTION_ID` | `[Subscription ID from step 2]` | Target Azure Subscription |
 | `CONNECTOR_API_KEY` | `[your-secure-key]` | Optional: Custom connector API key |
 
-### GitHub Environments (Optional but Recommended)
+### GitHub Environments (Recommended for Production Protection)
 
-Create environments: **Settings → Environments → New environment**
+GitHub Environments provide deployment protection rules, approval gates, and environment-specific secrets.
 
-**For each environment (`dev`, `test`, `prod`):**
-1. Add environment-specific secrets (if needed)
-2. Configure protection rules:
-   - **prod**: Enable "Required reviewers" (1-6 reviewers)
-   - **test/dev**: No approval required
+#### Create Environments
+
+Navigate to: **Settings → Environments → New environment**
+
+Create three environments: `dev`, `test`, `prod`
+
+---
+
+#### **DEV Environment Configuration**
+
+**Purpose:** Rapid development iteration with minimal friction
+
+**Steps:**
+1. Click **New environment** → Name: `dev`
+2. **Environment protection rules:**
+   - ☐ **Required reviewers:** None (fast feedback)
+   - ☐ **Wait timer:** 0 minutes
+   - ☑ **Deployment branches:** All branches (optional) or limit to `main`
+3. **Environment secrets:** None needed (uses repository secrets)
+4. Click **Save protection rules**
+
+**Result:** Deploys automatically when workflow runs with `dev` environment
+
+---
+
+#### **TEST Environment Configuration**
+
+**Purpose:** Pre-production validation with basic controls
+
+**Steps:**
+1. Click **New environment** → Name: `test`
+2. **Environment protection rules:**
+   - ☐ **Required reviewers:** 0 (or 1 reviewer if desired)
+   - ☐ **Wait timer:** 0 minutes
+   - ☑ **Deployment branches:** Select "Protected branches only" or specify `main`
+3. **Environment secrets:** (Optional)
+   - Add `CONNECTOR_API_KEY` if test needs a different API key
+4. Click **Save protection rules**
+
+**Result:** Deploys to test when triggered, with optional approval
+
+---
+
+#### **PROD Environment Configuration**
+
+**Purpose:** Production deployment with mandatory approvals and safeguards
+
+**Steps:**
+1. Click **New environment** → Name: `prod`
+2. **Environment protection rules:**
+   
+   ☑ **Required reviewers**
+   - Select 1-6 reviewers (recommended: 2 team members)
+   - ☑ Prevent self-review (if using GitHub Teams)
+   
+   ☑ **Wait timer** (Optional)
+   - Set to 5-15 minutes (allows time to cancel accidental deploys)
+   
+   ☑ **Deployment branches**
+   - Select "Protected branches only" or specify `main` only
+   - This prevents deploying prod from feature branches
+
+3. **Environment secrets:**
+   Add production-specific secrets:
+   | Secret Name | Value | Description |
+   |-------------|-------|-------------|
+   | `CONNECTOR_API_KEY` | `[prod-api-key]` | Production API key (different from dev) |
+   
+4. **Environment variables:** (Optional)
+   Add any prod-specific variables if needed
+
+5. Click **Save protection rules**
+
+**Result:** 
+- Workflow pauses before prod deployment
+- Designated reviewers receive notification
+- Manual approval required to proceed
+- Deployment history tracked
+
+---
+
+#### Visual Guide: Where to Find Settings
+
+```
+GitHub Repository
+└── Settings (top navigation)
+    └── Environments (left sidebar, under "Code and automation")
+        ├── New environment [Button]
+        └── Existing environments list
+            └── [Click environment name]
+                ├── Environment protection rules
+                ├── Environment secrets
+                └── Environment variables
+```
+
+---
+
+#### How Environments Work with Your Workflow
+
+Your workflow file already references environments:
+
+```yaml
+environment: ${{ github.event.inputs.environment || 'dev' }}
+```
+
+**Workflow Behavior:**
+
+| Trigger | Environment | Approval Required? |
+|---------|-------------|-------------------|
+| Push to `main` | `dev` (default) | No |
+| Manual dispatch → select "dev" | `dev` | No |
+| Manual dispatch → select "test" | `test` | Optional (per your config) |
+| Manual dispatch → select "prod" | `prod` | **Yes** (required reviewers) |
+
+---
+
+#### Additional Federated Credentials for Environments
+
+If using environment-specific OIDC authentication, add these federated credentials:
+
+```powershell
+# For dev environment
+az ad app federated-credential create --id $APP_ID --parameters @- <<EOF
+{
+  "name": "github-env-dev",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:aidevme/pp-terraform:environment:dev",
+  "audiences": ["api://AzureADTokenExchange"]
+}
+EOF
+
+# For test environment
+az ad app federated-credential create --id $APP_ID --parameters @- <<EOF
+{
+  "name": "github-env-test",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:aidevme/pp-terraform:environment:test",
+  "audiences": ["api://AzureADTokenExchange"]
+}
+EOF
+
+# For prod environment
+az ad app federated-credential create --id $APP_ID --parameters @- <<EOF
+{
+  "name": "github-env-prod",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:aidevme/pp-terraform:environment:prod",
+  "audiences": ["api://AzureADTokenExchange"]
+}
+EOF
+```
+
+---
+
+#### Benefits of Using Environments
+
+✅ **Deployment Protection:** Manual approval gates for production  
+✅ **Audit Trail:** Track who deployed what and when  
+✅ **Secret Isolation:** Different secrets per environment  
+✅ **Branch Restrictions:** Only deploy prod from `main`  
+✅ **Deployment History:** Visual timeline in GitHub UI  
+✅ **Rollback Clarity:** See previous deployment states
 
 ---
 
