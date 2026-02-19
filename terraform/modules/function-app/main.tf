@@ -15,6 +15,10 @@ resource "azurerm_application_insights" "this" {
   application_type    = "web"
 
   tags = var.tags
+
+  lifecycle {
+    ignore_changes = [workspace_id]
+  }
 }
 
 resource "azurerm_windows_function_app" "this" {
