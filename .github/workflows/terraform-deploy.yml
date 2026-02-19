@@ -10,11 +10,28 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: Target environment
+        description: 'Target environment'
         required: true
-        default: dev
+        default: 'dev'
         type: choice
-        options: [dev, test, prod]
+        options:
+          - dev
+          - test
+          - prod
+      action:
+        description: 'Terraform action'
+        required: true
+        default: 'plan-and-apply'
+        type: choice
+        options:
+          - plan-only
+          - plan-and-apply
+          - destroy
+      auto_approve:
+        description: 'Auto-approve apply (skip manual approval for non-prod)'
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   id-token: write       # Required for OIDC
@@ -37,6 +54,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Workflow Summary
+        run: |
+          echo "### 🚀 Terraform Workflow Triggered" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | \`${{ github.event.inputs.environment || 'dev' }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Action | \`${{ github.event.inputs.action || 'plan-and-apply' }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Azure Login via OIDC
         uses: azure/login@v2
@@ -120,8 +147,9 @@ jobs:
     environment: ${{ github.event.inputs.environment || 'dev' }}
     needs: terraform-plan
     if: |
-      github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
+      (github.event.inputs.action == 'plan-and-apply' || 
+       (github.event_name == 'push' && github.ref == 'refs/heads/main')) &&
       needs.terraform-plan.outputs.plan_exitcode == '2'
 
     steps:
@@ -187,3 +215,63 @@ jobs:
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Key Vault URI | $KV_URI |" >> $GITHUB_STEP_SUMMARY
           echo "| Function App | $FUNC_HOSTNAME |" >> $GITHUB_STEP_SUMMARY
+
+  # ── Destroy ───────────────────────────────────────────────────────────────────
+  terraform-destroy:
+    name: Destroy — ${{ github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    needs: terraform-plan
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.action == 'destroy'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_USE_OIDC: "true"
+          ARM_USE_CLI: "false"
+        run: |
+          terraform init \
+            -backend-config="environments/backend-${{ github.event.inputs.environment || 'dev' }}.hcl"
+
+      - name: Terraform Destroy
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_USE_OIDC: "true"
+          ARM_USE_CLI: "false"
+          TF_VAR_connector_api_key: ${{ secrets.CONNECTOR_API_KEY }}
+        run: |
+          terraform destroy \
+            -var-file="environments/${{ github.event.inputs.environment || 'dev' }}.tfvars" \
+            -auto-approve
+
+      - name: Destruction Summary
+        run: |
+          echo "### 🗑️ Terraform Destroy Complete" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** \`${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ All infrastructure resources have been destroyed." >> $GITHUB_STEP_SUMMARY
