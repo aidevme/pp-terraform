@@ -1,0 +1,147 @@
+name: 🏗️ Infrastructure Issue
+description: Report deployment failures, state issues, or Azure resource problems
+title: "[Infrastructure]: "
+labels: ["infrastructure", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report issues specifically related to infrastructure deployment, state management, or Azure resources.
+
+  - type: dropdown
+    id: issue-category
+    attributes:
+      label: Issue Category
+      description: What type of infrastructure issue is this?
+      options:
+        - Deployment failure
+        - State lock issue
+        - Resource drift detected
+        - Permission/authentication error
+        - Azure resource configuration
+        - Backend/state storage problem
+        - Provider version conflict
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Which environment is affected?
+      options:
+        - dev
+        - test
+        - prod
+        - All environments
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the infrastructure issue
+      placeholder: "Terraform state is locked... Resources showing drift... Deployment failing in GitHub Actions..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: trigger
+    attributes:
+      label: How was this triggered?
+      options:
+        - GitHub Actions workflow
+        - Local terraform apply
+        - Manual Azure Portal changes
+        - Terraform state manipulation
+        - Unknown/automatic
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output
+      description: Paste the complete error message or terraform output
+      render: shell
+      placeholder: |
+        Error: Error acquiring state lock
+        Error: Provider configuration error
+        Error: Resource already exists
+
+  - type: textarea
+    id: affected-resources
+    attributes:
+      label: Affected Resources
+      description: List the Azure resources or Terraform resources affected
+      placeholder: |
+        - azurerm_key_vault.this
+        - azurerm_storage_account.this
+        - module.function_app[0]
+
+  - type: textarea
+    id: state-info
+    attributes:
+      label: State Information
+      description: If relevant, provide details about the Terraform state
+      placeholder: |
+        State file: dev.tfstate
+        Backend: azurerm
+        Lock status: ...
+        Last successful apply: ...
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this issue?
+      options:
+        - Low - Minor inconvenience
+        - Medium - Workaround available
+        - High - Blocking deployments
+        - Critical - Production outage
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted-solutions
+    attributes:
+      label: What have you tried?
+      description: List troubleshooting steps you've already attempted
+      placeholder: |
+        - Ran terraform init
+        - Tried to unlock state manually
+        - Checked Azure Portal for resource status
+        - Reviewed GitHub Actions logs
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Recent changes, related PRs, Azure subscription details (without sensitive info)
+      placeholder: |
+        Recent changes:
+        - Updated provider version
+        - Modified backend configuration
+        - Manual changes in Azure Portal
+        
+        Subscription: [non-prod/prod]
+        Region: westeurope
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have verified this is not a duplicate issue
+          required: true
+        - label: I have checked the Azure Portal for resource status
+          required: false
+        - label: I have reviewed recent commits/changes
+          required: false
+        - label: I have attempted basic troubleshooting (terraform init, plan)
+          required: false

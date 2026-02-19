@@ -1,0 +1,122 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in the Terraform infrastructure
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below.
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Which environment is affected?
+      options:
+        - dev
+        - test
+        - prod
+        - Not environment-specific
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Affected Module
+      description: Which Terraform module is causing the issue?
+      options:
+        - keyvault
+        - storage
+        - function-app
+        - apim
+        - app-registration
+        - root module (main.tf)
+        - GitHub Actions workflow
+        - Multiple modules
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: "Example: terraform apply fails when deploying function app with error..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Run 'terraform init -backend-config=...'
+        2. Execute 'terraform plan -var-file=...'
+        3. Run 'terraform apply'
+        4. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+      placeholder: "Infrastructure should deploy successfully..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened
+      placeholder: "Terraform apply failed with error..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Paste relevant error messages or logs
+      render: shell
+      placeholder: |
+        Error: Error building ARM Config...
+        
+        Or GitHub Actions workflow logs...
+
+  - type: textarea
+    id: terraform-version
+    attributes:
+      label: Terraform Version
+      description: Output of `terraform version`
+      render: shell
+      placeholder: |
+        Terraform v1.7.5
+        on linux_amd64
+        + provider registry.terraform.io/hashicorp/azurerm v3.x.x
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (screenshots, related issues, etc.)
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have included relevant error logs
+          required: false
+        - label: This issue is reproducible
+          required: false

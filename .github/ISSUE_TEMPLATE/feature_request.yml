@@ -1,0 +1,122 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for the infrastructure
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe your idea below.
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature are you requesting?
+      options:
+        - New Azure resource/module
+        - Enhancement to existing module
+        - Workflow/CI-CD improvement
+        - Documentation
+        - Testing
+        - Security enhancement
+        - Cost optimization
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Related Module
+      description: Which module would this feature affect?
+      options:
+        - keyvault
+        - storage
+        - function-app
+        - apim
+        - app-registration
+        - New module
+        - GitHub Actions workflow
+        - Multiple modules
+        - Repository/documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Describe the pain point.
+      placeholder: "I'm frustrated when... It would be helpful if..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see
+      placeholder: "Add support for... Implement... Configure..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: "Alternatively, we could... Another approach would be..."
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe your use case and why this feature would be valuable
+      placeholder: "This would enable... It would help with... The business need is..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example Configuration
+      description: If applicable, show example Terraform code or configuration
+      render: hcl
+      placeholder: |
+        module "new_feature" {
+          source = "./modules/new-module"
+          
+          setting_one = "value"
+          setting_two = 42
+        }
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Nice to have
+        - Would improve workflow
+        - Important for my use case
+        - Critical/blocking
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: willing-to-contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to submit a pull request for this feature
+          required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or references
+      placeholder: "Related Azure documentation: ... Similar implementation: ..."

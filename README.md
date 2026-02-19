@@ -1,5 +1,7 @@
 # terraform-power-platform
 
+![Terraform for Power Platform](assets/pp-terraform-social-preview.png)
+
 > Infrastructure as Code for Microsoft Power Platform — Azure resources provisioned and managed with Terraform, deployed via GitHub Actions and Azure DevOps pipelines.
 
 ## What This Repo Provisions

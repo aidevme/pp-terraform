@@ -1,0 +1,139 @@
+name: 📚 Documentation
+description: Report missing, unclear, or incorrect documentation
+title: "[Docs]: "
+labels: ["documentation", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve the documentation! Report issues or suggest improvements.
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation needs attention?
+      options:
+        - README
+        - Module documentation
+        - Architecture diagrams
+        - Runbook/operations guide
+        - Pre-deployment checklist
+        - Post-deployment checklist
+        - Code comments
+        - GitHub workflow documentation
+        - Example configurations
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      description: What's the problem with the documentation?
+      options:
+        - Missing documentation
+        - Incorrect/outdated information
+        - Unclear/confusing explanation
+        - Typo or formatting issue
+        - Missing example
+        - Broken link
+        - Suggestion for improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is the documentation issue located?
+      placeholder: |
+        File: docs/pre-checklist.md
+        Section: "Service Principal Setup"
+        Line: 45
+        
+        Or URL: https://github.com/aidevme/pp-terraform/blob/main/README.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Documentation
+      description: Quote the current documentation (if exists)
+      placeholder: |
+        > "Run the bootstrap script to setup state storage"
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What's the Issue?
+      description: Clearly describe what's wrong or missing
+      placeholder: |
+        The documentation doesn't explain what the bootstrap script actually does.
+        Users need to know it creates resource groups and storage accounts.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be fixed or improved?
+      placeholder: |
+        Add a section explaining:
+        - What resources are created
+        - Required permissions
+        - What to do if it fails
+        
+        Or: "Change step 3 to include the subscription ID parameter..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Proposed Content (Optional)
+      description: If you have specific documentation content to suggest, provide it here
+      render: markdown
+      placeholder: |
+        ## Bootstrap Script
+        
+        The bootstrap script creates:
+        - Resource Group: `rg-terraform-state`
+        - Storage Account: `sttfstate[random]`
+        - Blob containers for each environment
+        
+        Run with: `./scripts/bootstrap.sh`
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who would benefit most from this documentation improvement?
+      options:
+        - New users/first-time setup
+        - Experienced users
+        - Contributors/developers
+        - Operations/DevOps teams
+        - Everyone
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: willing-to-help
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to submit a pull request to fix this documentation
+          required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: "This confused me when... It would be helpful for... Reference: ..."

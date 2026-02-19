@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Question or Discussion
+    url: https://github.com/aidevme/pp-terraform/discussions
+    about: Ask questions or discuss ideas in GitHub Discussions
+  - name: 📖 Documentation
+    url: https://github.com/aidevme/pp-terraform/blob/main/README.md
+    about: Read the repository documentation
+  - name: 🔧 Terraform Documentation
+    url: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
+    about: Official Terraform Azure Provider documentation
+  - name: ☁️ Azure Documentation
+    url: https://learn.microsoft.com/en-us/azure/
+    about: Microsoft Azure official documentation
