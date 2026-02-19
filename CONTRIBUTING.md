@@ -7,6 +7,7 @@ Thank you for your interest in contributing to the Power Platform Terraform infr
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
+- [Contributor License Agreement (CLA)](#contributor-license-agreement-cla)
 - [How Can I Contribute?](#how-can-i-contribute)
 - [Getting Started](#getting-started)
 - [Development Workflow](#development-workflow)
@@ -27,6 +28,65 @@ This project adheres to a code of conduct that all contributors are expected to 
 - Gracefully accept constructive criticism
 - Focus on what is best for the community
 - Show empathy towards other community members
+
+---
+
+## Contributor License Agreement (CLA)
+
+### Why We Require a CLA
+
+Before contributing code to this project, all contributors must sign a Contributor License Agreement (CLA). This protects both you and the project:
+
+- **Protects You**: Confirms you have the right to contribute your code
+- **Protects the Project**: Ensures we can use and distribute your contributions
+- **Protects Users**: Provides legal clarity for everyone using this infrastructure code
+
+### How the CLA Process Works
+
+1. **Open a Pull Request**: Submit your code contribution
+
+2. **CLA Bot Comments**: On your first PR, the CLA Assistant bot will automatically comment with signing instructions
+
+3. **Review and Sign**: Click the link in the bot's comment to review the CLA
+
+4. **Accept Terms**: Comment on your PR with:
+   ```
+   I have read the CLA Document and I hereby sign the CLA
+   ```
+
+5. **Verification**: The bot will verify your signature and update the PR status
+
+6. **One-Time Process**: Once signed, you won't need to sign again for future contributions
+
+### What the CLA Covers
+
+- Grant of copyright license for your contributions
+- Grant of patent license (if applicable)
+- Confirmation that your contribution is your original work
+- Confirmation of employer approval (if contributing on behalf of an employer)
+- No ongoing support obligations
+
+### CLA and Corporate Contributions
+
+If you're contributing on behalf of your employer:
+
+- Ensure you have permission to contribute
+- Your employer may need to sign a Corporate CLA
+- Indicate your employer affiliation when signing
+
+### Questions About the CLA?
+
+- **View the CLA**: [See the full CLA document](https://gist.github.com/aidevme/4bc4459f02e8fab)
+- **CLA Status**: Check signature status on the Gist
+- **Need Help?**: Open an issue if you have questions about the CLA process
+
+### Exempt Contributions
+
+The following contributions typically don't require a CLA (bot handles this automatically):
+
+- Trivial typo fixes in documentation
+- Comments on issues (not code contributions)
+- Updates to non-code files (like .gitignore)
 
 ---
 
@@ -233,6 +293,7 @@ tags = {
 - [ ] Documentation is updated
 - [ ] Commit messages follow guidelines
 - [ ] PR description explains the change
+- [ ] CLA signed (bot will prompt on first contribution)
 
 ### PR Description Template
 
@@ -258,10 +319,11 @@ Describe testing performed
 
 ### Review Process
 
-1. Automated checks must pass (format, validate)
-2. At least one maintainer approval required
-3. All conversations must be resolved
-4. Branch must be up-to-date with main
+1. CLA must be signed (for code contributions)
+2. Automated checks must pass (format, validate)
+3. At least one maintainer approval required
+4. All conversations must be resolved
+5. Branch must be up-to-date with main
 
 ### After Approval
 
@@ -416,6 +478,8 @@ Contributors will be recognized in:
 ## License
 
 By contributing to this project, you agree that your contributions will be licensed under the same license as the project (see [LICENSE](LICENSE) file).
+
+All contributors must sign the [Contributor License Agreement (CLA)](#contributor-license-agreement-cla) before their contributions can be merged. This is a one-time requirement that helps protect both you and the project.
 
 ---
 
