@@ -1,5 +1,12 @@
 # terraform-power-platform
 
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/aidevme/pp-terraform/terraform-deploy.yml?branch=main&logo=github&label=CI%2FCD)](https://github.com/aidevme/pp-terraform/actions)
+[![License](https://img.shields.io/github/license/aidevme/pp-terraform?color=blue)](LICENSE)
+[![Terraform Version](https://img.shields.io/badge/terraform-%3E%3D1.5.0-623CE4?logo=terraform)](https://www.terraform.io/)
+[![Azure Provider](https://img.shields.io/badge/azurerm-%3E%3D3.0-0089D6?logo=azuredevops)](https://registry.terraform.io/providers/hashicorp/azurerm/latest)
+[![Last Commit](https://img.shields.io/github/last-commit/aidevme/pp-terraform?color=orange)](https://github.com/aidevme/pp-terraform/commits/main)
+[![Stars](https://img.shields.io/github/stars/aidevme/pp-terraform?style=social)](https://github.com/aidevme/pp-terraform/stargazers)
+
 ![Terraform for Power Platform](assets/pp-terraform-social-preview.png)
 
 > Infrastructure as Code for Microsoft Power Platform — Azure resources provisioned and managed with Terraform, deployed via GitHub Actions and Azure DevOps pipelines.
