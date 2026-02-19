@@ -101,5 +101,5 @@ Full walkthrough: [Terraform for Power Platform Developers — aidevme.com](http
 
 ## Author
 
-**Zombik** — Senior Power Platform Expert, ELCA Informatik AG  
-[aidevme.com](https://aidevme.com) | [LinkedIn](https://linkedin.com)
+**Zsolt Zombik** — Senior Power Platform Expert  
+[aidevme.com](https://aidevme.com) | [LinkedIn](https://www.linkedin.com/in/zsoltzombik/)
