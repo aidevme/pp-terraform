@@ -114,99 +114,131 @@ Microsoft Entra ID (Azure AD)
 
 ### GitHub Actions Workflow
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        GitHub Actions                            │
-│                                                                   │
-│  Trigger:                                                        │
-│  ├── Push to main (terraform/**)                                │
-│  ├── Pull Request to main (terraform/**)                        │
-│  └── Manual Dispatch (workflow_dispatch)                        │
-│                                                                   │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Job 1: terraform-plan                                    │  │
-│  │  ├── Checkout code                                        │  │
-│  │  ├── Azure Login (OIDC)                                   │  │
-│  │  ├── Setup Terraform                                      │  │
-│  │  ├── Terraform Init (with backend config)                │  │
-│  │  ├── Terraform Format Check                              │  │
-│  │  ├── Terraform Validate                                   │  │
-│  │  ├── Terraform Plan                                       │  │
-│  │  ├── Post Plan to PR (if PR)                             │  │
-│  │  └── Upload Plan Artifact                                │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                           │                                      │
-│                           ▼                                      │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Job 2: terraform-apply                                   │  │
-│  │  Condition: main branch && changes detected              │  │
-│  │  Environment: dev/test/prod (with protection rules)      │  │
-│  │  ├── Checkout code                                        │  │
-│  │  ├── Azure Login (OIDC)                                   │  │
-│  │  ├── Setup Terraform                                      │  │
-│  │  ├── Download Plan Artifact                              │  │
-│  │  ├── Terraform Init                                       │  │
-│  │  ├── Terraform Apply (auto-approve)                      │  │
-│  │  └── Export Outputs to Summary                           │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                           │                                      │
-│                           ▼ (manual dispatch: destroy)          │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Job 3: terraform-destroy (optional)                      │  │
-│  │  Condition: workflow_dispatch && action == 'destroy'     │  │
-│  │  ├── Checkout code                                        │  │
-│  │  ├── Azure Login (OIDC)                                   │  │
-│  │  ├── Setup Terraform                                      │  │
-│  │  ├── Terraform Init                                       │  │
-│  │  ├── Terraform Destroy (auto-approve)                    │  │
-│  │  └── Post Summary                                        │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼ OIDC Authentication
-┌─────────────────────────────────────────────────────────────────┐
-│                    Microsoft Entra ID                            │
-│                                                                   │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │  Validate OIDC Token                                    │    │
-│  │  ├── Issuer: token.actions.githubusercontent.com        │    │
-│  │  ├── Subject: repo:aidevme/pp-terraform:...           │    │
-│  │  ├── Audience: api://AzureADTokenExchange              │    │
-│  │  └── Grant Access Token                                │    │
-│  └────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      Azure Subscription                          │
-│                                                                   │
-│  Terraform Provider (azurerm, azuread)                          │
-│  ├── Authenticates with Access Token                            │
-│  ├── Creates/Updates/Deletes resources                          │
-│  └── Manages state in Azure Storage                             │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Start([GitHub Actions Triggered])
+    
+    subgraph Triggers
+        T1[Push to main<br/>terraform/**]
+        T2[Pull Request<br/>terraform/**]
+        T3[Manual Dispatch<br/>workflow_dispatch]
+    end
+    
+    Start --> Triggers
+    
+    subgraph Job1["Job 1: terraform-plan"]
+        P1[Checkout Code]
+        P2[Azure Login via OIDC]
+        P3[Setup Terraform]
+        P4[Terraform Init]
+        P5[Terraform Format Check]
+        P6[Terraform Validate]
+        P7[Terraform Plan]
+        P8{Is PR?}
+        P9[Post Plan to PR]
+        P10[Upload Plan Artifact]
+        
+        P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7 --> P8
+        P8 -->|Yes| P9 --> P10
+        P8 -->|No| P10
+    end
+    
+    Triggers --> Job1
+    
+    subgraph Job2["Job 2: terraform-apply"]
+        direction TB
+        A0[Condition:<br/>main branch &&<br/>changes detected]
+        A1[Checkout Code]
+        A2[Azure Login via OIDC]
+        A3[Setup Terraform]
+        A4[Download Plan Artifact]
+        A5[Terraform Init]
+        A6[Terraform Apply<br/>auto-approve]
+        A7[Export Outputs]
+        
+        A0 --> A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7
+    end
+    
+    Job1 --> A0
+    
+    subgraph Job3["Job 3: terraform-destroy (Optional)"]
+        direction TB
+        D0[Condition:<br/>workflow_dispatch &&<br/>action == destroy]
+        D1[Checkout Code]
+        D2[Azure Login via OIDC]
+        D3[Setup Terraform]
+        D4[Terraform Init]
+        D5[Terraform Destroy<br/>auto-approve]
+        D6[Post Summary]
+        
+        D0 --> D1 --> D2 --> D3 --> D4 --> D5 --> D6
+    end
+    
+    Job1 --> D0
+    
+    Auth[OIDC Authentication Flow]
+    
+    subgraph EntraID["Microsoft Entra ID"]
+        E1[Validate OIDC Token]
+        E2[Verify Issuer:<br/>token.actions.githubusercontent.com]
+        E3[Verify Subject:<br/>repo:aidevme/pp-terraform]
+        E4[Grant Access Token]
+        
+        E1 --> E2 --> E3 --> E4
+    end
+    
+    Job1 --> Auth
+    Job2 --> Auth
+    Job3 --> Auth
+    Auth --> EntraID
+    
+    subgraph Azure["Azure Subscription"]
+        Z1[Terraform Provider<br/>azurerm, azuread]
+        Z2[Create/Update/Delete<br/>Resources]
+        Z3[Manage State in<br/>Azure Storage]
+        
+        Z1 --> Z2 --> Z3
+    end
+    
+    EntraID --> Azure
+    
+    style Start fill:#e1f5ff
+    style Job1 fill:#fff4e6
+    style Job2 fill:#e8f5e9
+    style Job3 fill:#ffebee
+    style EntraID fill:#f3e5f5
+    style Azure fill:#e3f2fd
 ```
 
 ### Terraform State Management
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Terraform Backend Configuration                                 │
-│                                                                   │
-│  Backend: azurerm                                                │
-│  ├── Resource Group: rg-terraform-state                         │
-│  ├── Storage Account: sttfstate{random}                         │
-│  ├── Container: {environment}-tfstate                           │
-│  └── Key: {environment}.tfstate                                 │
-│                                                                   │
-│  State Locking: Enabled (automatic with Azure Storage)          │
-│  Encryption: Enabled (Azure Storage SSE)                        │
-│                                                                   │
-│  Per-Environment Backends:                                       │
-│  ├── dev   → backend-dev.hcl   → dev-tfstate/dev.tfstate       │
-│  ├── test  → backend-test.hcl  → test-tfstate/test.tfstate     │
-│  └── prod  → backend-prod.hcl  → prod-tfstate/prod.tfstate     │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Backend["Terraform Backend Configuration"]
+        B1["Backend: azurerm"]
+        B2["Resource Group:<br/>rg-terraform-state"]
+        B3["Storage Account:<br/>sttfstate{random}"]
+        B4["Container:<br/>{environment}-tfstate"]
+        B5["Key:<br/>{environment}.tfstate"]
+        
+        B1 --> B2 --> B3 --> B4 --> B5
+    end
+    
+    subgraph Environments["Per-Environment Backends"]
+        E1["dev<br/>backend-dev.hcl<br/>→ dev-tfstate/dev.tfstate"]
+        E2["test<br/>backend-test.hcl<br/>→ test-tfstate/test.tfstate"]
+        E3["prod<br/>backend-prod.hcl<br/>→ prod-tfstate/prod.tfstate"]
+    end
+    
+    Backend --> Environments
+    
+    Features["✓ State Locking: Automatic<br/>✓ Encryption: Azure Storage SSE<br/>✓ Versioning: Enabled"]
+    
+    Environments --> Features
+    
+    style Backend fill:#e1f5ff
+    style Environments fill:#f1f8e9
+    style Features fill:#fff9c4
 ```
 
 ---
