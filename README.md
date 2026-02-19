@@ -95,6 +95,13 @@ terraform apply -var-file=environments/dev.tfvars
 - Azure subscription (Contributor role)
 - GitHub or Azure DevOps account
 
+## Documentation
+
+- **[Architecture Overview](docs/architecture.md)** — Complete infrastructure architecture, CI/CD, security, and data flows
+- **[Pre-Deployment Checklist](docs/pre-checklist.md)** — Setup guide for service principals, permissions, and GitHub configuration
+- **[Post-Deployment Checklist](docs/post-checklist.md)** — Validation and testing steps after deployment
+- **[Operations Runbook](docs/runbook.md)** — Day-2 operations and troubleshooting guide
+
 ## Related Article
 
 Full walkthrough: [Terraform for Power Platform Developers — aidevme.com](https://aidevme.com/terraform-azure-power-platform-developers)
