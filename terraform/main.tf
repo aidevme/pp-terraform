@@ -15,16 +15,16 @@ resource "azurerm_resource_group" "main" {
 module "keyvault" {
   source = "./modules/keyvault"
 
-  project_name              = var.project_name
-  environment               = var.environment
-  location                  = var.location
-  resource_group_name       = azurerm_resource_group.main.name
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
-  deployer_object_id        = data.azurerm_client_config.current.object_id
-  sku                       = var.keyvault_sku
+  project_name               = var.project_name
+  environment                = var.environment
+  location                   = var.location
+  resource_group_name        = azurerm_resource_group.main.name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  deployer_object_id         = data.azurerm_client_config.current.object_id
+  sku                        = var.keyvault_sku
   soft_delete_retention_days = var.keyvault_soft_delete_days
-  purge_protection_enabled  = var.keyvault_purge_protection
-  tags                      = var.tags
+  purge_protection_enabled   = var.keyvault_purge_protection
+  tags                       = var.tags
 }
 
 # ─── Module: Storage ──────────────────────────────────────────────────────────

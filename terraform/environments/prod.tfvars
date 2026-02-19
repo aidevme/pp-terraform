@@ -10,9 +10,9 @@ deploy_app_registration = true
 
 keyvault_sku              = "standard"
 keyvault_soft_delete_days = 90
-keyvault_purge_protection = true   # Always true in production
+keyvault_purge_protection = true # Always true in production
 
-storage_replication_type    = "ZRS"  # Zone-redundant for production
+storage_replication_type    = "ZRS" # Zone-redundant for production
 storage_blob_retention_days = 30
 
 function_dotnet_version = "v8.0"

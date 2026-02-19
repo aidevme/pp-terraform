@@ -1,12 +1,12 @@
 resource "azurerm_key_vault" "this" {
-  name                        = "kv-${var.project_name}-${var.environment}"
-  location                    = var.location
-  resource_group_name         = var.resource_group_name
-  tenant_id                   = var.tenant_id
-  sku_name                    = var.sku
-  soft_delete_retention_days  = var.soft_delete_retention_days
-  purge_protection_enabled    = var.purge_protection_enabled
-  enable_rbac_authorization   = false
+  name                       = "kv-${var.project_name}-${var.environment}"
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  tenant_id                  = var.tenant_id
+  sku_name                   = var.sku
+  soft_delete_retention_days = var.soft_delete_retention_days
+  purge_protection_enabled   = var.purge_protection_enabled
+  enable_rbac_authorization  = false
 
   tags = var.tags
 }
